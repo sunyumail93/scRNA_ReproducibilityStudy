@@ -53,7 +53,7 @@ There is an optional step to use `cellranger mkgtf` to filter out the genes we d
 ```
 #For example, I have a GTF like this:
 ```
-X | FlyBase | mRNA | 19961689 | 19968479 | . | + | . | gene_id "FBgn0031081"; gene_symbol "Nep3"; transcript_id "FBtr0070000"; transcript_symbol "Nep3-RA";
+X  FlyBase  mRNA  19961689  19968479  .  +  .  gene_id "FBgn0031081"; gene_symbol "Nep3"; transcript_id "FBtr0070000"; transcript_symbol "Nep3-RA";
 
 
 ## 3, Build STAR reference for genome mapping:
