@@ -6,7 +6,7 @@ Tattikota, Sudhir Gopal, et al. "A single-cell survey of Drosophila blood." *Eli
 
 ## 0. Terms
 
-Each single dataset contains Index (Data_I1, or Data_1) file, Barcode (Data_R1, or Data_2), and Reads (Data_R2, or Data_3) files.
+Each single cell dataset contains Index (Data_I1, or Data_1) file, Barcode (Data_R1, or Data_2), and Reads (Data_R2, or Data_3) files.
 
 UMI: Unique Molecular Identifier, 10-12 bp random sequences ligated to mRNAs. UMI is used to identify mRNA amout and minimize sequencing errors.
 
@@ -17,10 +17,11 @@ Chemistry v2 and v3: The v2 R1 barcode length is 26bp (16bp cell barcode + 10bp 
 ## 1. Data retrieval from NCBI
 10X genomics single cell RNAseq dataset from SRA [GSE146596](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE146596):
 
-Here we focus on 4 10X genomics datasets: GSM4396377, GSM4396378, GSM4396379, GSM4396380. Each data has 4 runs (ran in 4 lanes), and the SRR id: SRR11263248 - SRR11263263
+Here we focus on 4 10X genomics datasets: GSM4396377, GSM4396378, GSM4396379, GSM4396380.
+
+Each data has 4 runs (ran in 4 lanes), and the SRR ids are: SRR11263248 - SRR11263263
 
 Use [SRA Toolkit](https://ncbi.github.io/sra-tools/) to download fastq files, with **--split-files** to separate index (I1), barcode file (R1), and sequences (R2): _1, _2, _3:
-
 
 ```
 #Download
@@ -225,6 +226,32 @@ GSM4396377/
 
 ## 5, Optional: Run Cell Ranger aggr to merge multiple datasets
 
+We can also merge multiple datasets in R, so this step is optinal.
+
 Go to the Aggr folder, and prepare the .csv file storing data information:
+
+```
+#Prepare the sample description file.
+cat FlyBlood.csv
+$ library_id,molecule_h5
+$ GSM4396377_unwounded1,GSM4396377_unwounded1/outs/molecule_info.h5
+$ GSM4396378_wounded1,GSM4396378_wounded1/outs/molecule_info.h5
+$ GSM4396379_unwounded2,GSM4396379_unwounded2/outs/molecule_info.h5
+$ GSM4396380_wounded2,GSM4396380_wounded2/outs/molecule_info.h5
+
+#Submit Cell Ranger aggr scripts:
+#--id: final output folder name
+#--csv=: description file
+#--normalize: default: mapped. possible values: mapped, none
+#--localcores: CPU
+#--localmem: memory in GB
+#--nosecondary: only calculate the counts. This is optional since downstream analysis can be done in R.
+
+cellranger aggr --id=FlyBloodTest --csv=FlyBlood.csv --normalize=mapped --localcores=20 --localmem=80 --nosecondary
+
+#Or turn on the analysis workflow:
+cellranger aggr --id=FlyBloodTest --csv=FlyBlood.csv --normalize=mapped --localcores=20 --localmem=80
+```
+Check output files:
 
 
