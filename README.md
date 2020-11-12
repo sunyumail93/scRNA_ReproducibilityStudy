@@ -247,10 +247,10 @@ $ GSM4396380_wounded2,GSM4396380_wounded2/outs/molecule_info.h5
 #--localmem: memory in GB
 #--nosecondary: only calculate the counts. This is optional since downstream analysis can be done in R.
 
-cellranger aggr --id=FlyBloodTest --csv=FlyBlood.csv --normalize=mapped --localcores=20 --localmem=80 --nosecondary
+cellranger aggr --id=FlyBloodAggr_NoAnalysis --csv=FlyBlood.csv --normalize=mapped --localcores=20 --localmem=80 --nosecondary
 
 #Or turn on the analysis workflow:
-cellranger aggr --id=FlyBloodTest --csv=FlyBlood.csv --normalize=mapped --localcores=20 --localmem=80
+cellranger aggr --id=FlyBloodAggr --csv=FlyBlood.csv --normalize=mapped --localcores=20 --localmem=80
 ```
 Check output files:
 
