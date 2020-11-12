@@ -52,7 +52,7 @@ grep -v snoRNA dmel-all-r6.27.gtf|grep -v mir- > dmel-all-r6.27.filtered.gtf.t
 There is an optional step to use `cellranger mkgtf` to filter out the genes we don't need, based on the features in column 9:
 ```
 #For example, I have a GTF like this:
-|X|FlyBase|mRNA|19961689|19968479|.|+|.|gene_id "FBgn0031081"; gene_symbol "Nep3"; transcript_id "FBtr0070000"; transcript_symbol "Nep3-RA";|
+X | FlyBase | mRNA | 19961689 | 19968479 | . | + | . | gene_id "FBgn0031081"; gene_symbol "Nep3"; transcript_id "FBtr0070000"; transcript_symbol "Nep3-RA";
 
 
 ```
