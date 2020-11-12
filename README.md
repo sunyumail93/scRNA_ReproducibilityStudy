@@ -30,7 +30,7 @@ cat SRR11263260_2.fastq SRR11263261_2.fastq SRR11263262_2.fastq SRR11263263_2.fa
 cat SRR11263260_3.fastq SRR11263261_3.fastq SRR11263262_3.fastq SRR11263263_3.fastq > GSM4396380_3.fastq
 ```
 
-Other platforms such as Dropseq, InDrops may not be compatible with Cell Ranger pipeline:
+Other platforms such as Drop-seq, inDrops may not be compatible with Cell Ranger pipeline:
 
 https://www.reddit.com/r/bioinformatics/comments/8ht6kc/converting_dropseq_and_fluidigm_fastqs_into/
 
@@ -38,11 +38,24 @@ https://www.reddit.com/r/bioinformatics/comments/8ht6kc/converting_dropseq_and_f
 
 As claimed in the original paper, they used fruit fly genome r6.27:
 
-Download the same genome as the eLife paper used: FlyBase r6.27: [Fly r6.27 Genome](ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/dmel_r6.27_FB2019_02/fasta/)
+Download the same genome as the eLife paper used: FlyBase r6.27: [dmel-all-chromosome-r6.27.fasta](ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/dmel_r6.27_FB2019_02/fasta/)
 
-Then download gtf annotation file from: [Fly r6.27 GTF](ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/dmel_r6.27_FB2019_02/gtf/)
+Then download gtf annotation file: [dmel-all-r6.27.gtf](ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/dmel_r6.27_FB2019_02/gtf/)
+
+After comparing the GTF I downloaded with the published single cell counts, I realized they removed mirRNA genes and snoRNA genes.
+
+```
+grep -v snoRNA dmel-all-r6.27.gtf|grep -v mir- > dmel-all-r6.27.filtered.gtf.t
+
+```
+
+There is an optional step to use `cellranger mkgtf` to filter out the genes we don't need, based on the features in column 9:
+```
+#For example, I have a GTF like this:
+|X|FlyBase|mRNA|19961689|19968479|.|+|.|gene_id "FBgn0031081"; gene_symbol "Nep3"; transcript_id "FBtr0070000"; transcript_symbol "Nep3-RA";|
 
 
+```
 
 
 ## 3, Build STAR reference for genome mapping:
