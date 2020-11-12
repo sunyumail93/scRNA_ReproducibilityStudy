@@ -4,6 +4,16 @@ A reproducibility study of a single cell dataset, published in this paper:
 
 Tattikota, Sudhir Gopal, et al. "A single-cell survey of Drosophila blood." *Elife* 9 (2020): e54818.
 
+## 0. Terms
+
+Each single dataset contains Index (Data_I1, or Data_1) file, Barcode (Data_R1, or Data_2), and Reads (Data_R2, or Data_3) files.
+
+UMI: Unique Molecular Identifier, 10-12 bp random sequences ligated to mRNAs. UMI is used to identify mRNA amout and minimize sequencing errors.
+
+The R1 file contains 16bp barcode + 10bp (or 12bp) UMI sequences. The R2 file contains single-end RNAseq read for each barcode+UNI.
+
+Chemistry v2 and v3: The v2 R1 barcode length is 26bp (16bp cell barcode + 10bp UMI), while v3 is 28bp (16bp cell barcode + 12bp UMI)
+
 ## 1. Data retrieval from NCBI
 10X genomics single cell RNAseq dataset from SRA [GSE146596](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE146596):
 
@@ -11,7 +21,6 @@ Here we focus on 4 10X genomics datasets: GSM4396377, GSM4396378, GSM4396379, GS
 
 Use [SRA Toolkit](https://ncbi.github.io/sra-tools/) to download fastq files, with **--split-files** to separate index (I1), barcode file (R1), and sequences (R2): _1, _2, _3:
 
-The R1 file contains 16bp barcode + 10bp UMI sequences. The R2 file contains single-end RNAseq read for each barcode+UNI.
 
 ```
 #Download
@@ -165,7 +174,7 @@ scRNA/
         ├── GSM4396380_S1_L001_R1_001.fastq.gz
         └── GSM4396380_S1_L001_R2_001.fastq.gz
     ├── Counting/
-    ├── Aggr/
+    └── Aggr/
 ```
 
 Go to the Counting folder, and submit cellranger count scripts:
@@ -182,12 +191,12 @@ cellranger count --help
 #--expect-cells: optional parameter, default 3000
 #--localcores: CPU
 #--localmem: memory in GB
-#--nosecondary: only calculate the counts. Downstream analysis will be done in R.
+#--nosecondary: only calculate the counts. This is optional since downstream analysis can be done in R.
 
-cellranger count --id GSM4396377 --transcriptome=../Annotation/dm6 --fastqs=../Data --sample=GSM4396377 --localcores=20 --localmem=80 --nosecondary
-cellranger count --id GSM4396378 --transcriptome=../Annotation/dm6 --fastqs=../Data --sample=GSM4396378 --localcores=20 --localmem=80 --nosecondary
-cellranger count --id GSM4396379 --transcriptome=../Annotation/dm6 --fastqs=../Data --sample=GSM4396379 --localcores=20 --localmem=80 --nosecondary
-cellranger count --id GSM4396380 --transcriptome=../Annotation/dm6 --fastqs=../Data --sample=GSM4396380 --localcores=20 --localmem=80 --nosecondary
+cellranger count --id GSM4396377_unwounded1 --transcriptome=../Annotation/dm6 --fastqs=../Data --sample=GSM4396377 --localcores=20 --localmem=80
+cellranger count --id GSM4396378_wounded1 --transcriptome=../Annotation/dm6 --fastqs=../Data --sample=GSM4396378 --localcores=20 --localmem=80
+cellranger count --id GSM4396379_unwounded2 --transcriptome=../Annotation/dm6 --fastqs=../Data --sample=GSM4396379 --localcores=20 --localmem=80
+cellranger count --id GSM4396380_wounded2 --transcriptome=../Annotation/dm6 --fastqs=../Data --sample=GSM4396380 --localcores=20 --localmem=80
 ```
 
 Check output files:
@@ -197,18 +206,24 @@ GSM4396377/
        ├── web_summary.html                                     #Summary file
        ├── metrics_summary.csv                                  #Data metrics
        ├── possorted_genome_bam.bam, bai                        #Genome mapping file
-       ├── filtered_gene_bc_matrices/
-           └── barcodes.tsv.gz、features.tsv.gz、matrix.mtx.gz  #Results for downstream analysis in R (e.g. Seurat、Scater、Monocle)
-       ├── filtered_feature_bc_matrix.h5                        #Filtered barcodes in h5 format
+       ├── filtered_gene_bc_matrices/                           #Results for downstream analysis in R (e.g. Seurat、Scater、Monocle)
+           ├── barcodes.tsv.gz                                  #Barcodes detected. `wc -l` will tell you how many cells detected
+           ├── features.tsv.gz                                  #Gene list
+           └── matrix.mtx.gz                                    #mtx format for gene expression
+       ├── filtered_feature_bc_matrix.h5                        #Filtered barcodes in HDF5 format
        ├── raw_feature_bc_matrix                                #Raw barcode info
        ├── raw_feature_bc_matrix.h5                             #Raw barcode info in HDF5 format
-       ├── analysis/
-           ...                                                  #If you choose to run analysis, this path contains results
+       ├── analysis/                                            #If you choose to run analysis, this path contains results
+           ├── clustering
+           ├── diffexp
+           ├── pca
+           ├── tsne
+           └── umap
        ├── molecule_info.h5                                     #Input file for cellranger aggr program
        └── cloupe.cloupe                                        #For 10X visualization tool Loupe Cell Browser
 ```
 
-## 5, Run Cell Ranger aggr to merge multiple datasets
+## 5, Optional: Run Cell Ranger aggr to merge multiple datasets
 
 Go to the Aggr folder, and prepare the .csv file storing data information:
 
