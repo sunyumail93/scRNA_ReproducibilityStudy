@@ -14,6 +14,8 @@ The R1 file contains 16bp barcode + 10bp (or 12bp) UMI sequences. The R2 file co
 
 Chemistry v2 and v3: The v2 R1 barcode length is 26bp (16bp cell barcode + 10bp UMI), while v3 is 28bp (16bp cell barcode + 12bp UMI)
 
+Other scRNAseq methods: [Drop-seq](http://mccarrolllab.org/dropseq/) and [inDrops](https://www.cell.com/cell/fulltext/S0092-8674(15)00500-0?_returnURL=https%3A%2F%2Flinkinghub.elsevier.com%2Fretrieve%2Fpii%2FS0092867415005000%3Fshowall%3Dtrue#%20)
+
 ## 1. Data retrieval from NCBI
 10X genomics single cell RNAseq dataset from SRA [GSE146596](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE146596):
 
