@@ -2,7 +2,7 @@
 
 A reproducibility study of a single cell dataset, published in this paper:
 
-Tattikota, Sudhir Gopal, et al. "A single-cell survey of Drosophila blood." Elife 9 (2020): e54818.
+Tattikota, Sudhir Gopal, et al. "A single-cell survey of Drosophila blood." *Elife* 9 (2020): e54818.
 
 ## 1. Data retrieval from NCBI
 10X genomics single cell RNAseq dataset from SRA [GSE146596](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE146596):
@@ -38,11 +38,10 @@ https://www.reddit.com/r/bioinformatics/comments/8ht6kc/converting_dropseq_and_f
 
 As claimed in the original paper, they used fruit fly genome r6.27:
 
-Download the same genome as the eLife paper used: FlyBase r6.27:
-ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/dmel_r6.27_FB2019_02/fasta/
+Download the same genome as the eLife paper used: FlyBase r6.27: [Fly r6.27 Genome](ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/dmel_r6.27_FB2019_02/fasta/)
 
-Then download gtf annotation file from:
-ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/dmel_r6.27_FB2019_02/gtf/
+Then download gtf annotation file from: [Fly r6.27 GTF](ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/dmel_r6.27_FB2019_02/gtf/)
+
 
 
 
