@@ -6,7 +6,9 @@ Tattikota, Sudhir Gopal, et al. "A single-cell survey of Drosophila blood." *Eli
 
 ## 0. Terms
 
-Each single cell dataset contains Index (Data_I1, or Data_1) file, Barcode (Data_R1, or Data_2), and Reads (Data_R2, or Data_3) files.
+Each single cell dataset contains Index (Data_I1, or Data_1) file, Barcode (Data_R1, or Data_2), and Read (Data_R2, or Data_3) files.
+
+Index: usually contains 8 bp sequences. For each data, it usually uses 4 different indexes. We can combine them to one data.
 
 UMI: Unique Molecular Identifier, 10-12 bp random sequences ligated to mRNAs. UMI is used to identify mRNA amout and minimize sequencing errors.
 
@@ -23,11 +25,11 @@ Other scRNAseq methods: [Drop-seq](http://mccarrolllab.org/dropseq/) and [inDrop
 ## 1. Data retrieval from NCBI
 10X genomics single cell RNAseq dataset from SRA [GSE146596](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE146596):
 
-Here we focus on 4 10X genomics datasets: GSM4396377, GSM4396378, GSM4396379, GSM4396380.
+Here we focus on 4 10X genomics data: GSM4396377, GSM4396378, GSM4396379, GSM4396380.
 
-Each data has 4 runs (ran in 4 lanes), and the SRR ids are: SRR11263248 - SRR11263263
+Each data has 4 runs (ran in 4 lanes, using 4 different index sequences), and the SRR ids are: SRR11263248 - SRR11263263
 
-Use [SRA Toolkit](https://ncbi.github.io/sra-tools/) to download fastq files, with **--split-files** to separate index (I1), barcode file (R1), and sequences (R2): _1, _2, _3:
+Use [SRA Toolkit](https://ncbi.github.io/sra-tools/) to download fastq files, with **--split-files** to separate index (_1), barcode file (_2), and sequences (_3):
 
 ```
 #Download
@@ -46,6 +48,25 @@ cat SRR11263256_3.fastq SRR11263257_3.fastq SRR11263258_3.fastq SRR11263259_3.fa
 cat SRR11263260_1.fastq SRR11263261_1.fastq SRR11263262_1.fastq SRR11263263_1.fastq > GSM4396380_1.fastq
 cat SRR11263260_2.fastq SRR11263261_2.fastq SRR11263262_2.fastq SRR11263263_2.fastq > GSM4396380_2.fastq
 cat SRR11263260_3.fastq SRR11263261_3.fastq SRR11263262_3.fastq SRR11263263_3.fastq > GSM4396380_3.fastq
+
+#Check data
+cat GSM4396377_1.fastq | head -4
+@SRR11263248.1 NB501807:200:HMWL7BGX5:1:11101:21087:1051 length=8
+GGTTTACT
++SRR11263248.1 NB501807:200:HMWL7BGX5:1:11101:21087:1051 length=8
+AAA6AEEA
+
+cat GSM4396377_2.fastq | head -4
+@SRR11263248.1 NB501807:200:HMWL7BGX5:1:11101:21087:1051 length=26
+ATCATCTGTGTGCNTCTTGTGAGAAC
++SRR11263248.1 NB501807:200:HMWL7BGX5:1:11101:21087:1051 length=26
+AAAAAEEEEEEE/#AEEEEEE/E/E/
+
+cat GSM4396377_3.fastq | head -4
+@SRR11263248.1 NB501807:200:HMWL7BGX5:1:11101:21087:1051 length=57
+CAGCCATNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN
++SRR11263248.1 NB501807:200:HMWL7BGX5:1:11101:21087:1051 length=57
+A//AAE/##################################################
 ```
 
 Other platforms such as Drop-seq, inDrops may not be compatible with Cell Ranger pipeline:
@@ -58,13 +79,12 @@ As claimed in the original paper, they used fruit fly genome r6.27:
 
 Download the same genome as the eLife paper used: FlyBase r6.27: [dmel-all-chromosome-r6.27.fasta](ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/dmel_r6.27_FB2019_02/fasta/)
 
-Then download gtf annotation file: [dmel-all-r6.27.gtf](ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/dmel_r6.27_FB2019_02/gtf/)
+Then download GTF annotation file: [dmel-all-r6.27.gtf](ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/dmel_r6.27_FB2019_02/gtf/)
 
-After comparing the GTF I downloaded with the published single cell counts (gene names), I realized they removed mirRNA genes and snoRNA genes.
+After comparing the GTF I downloaded with the published single cell counts (gene names), I found they removed mirRNA genes and snoRNA genes in the annotation.
 
 ```
 grep -v snoRNA dmel-all-r6.27.gtf|grep -v mir- > dmel-all-r6.27.filtered.gtf.t
-
 ```
 
 Optional: An optional step to use `cellranger mkgtf` to keep the genes (usually by a group tag, such as 'protein_coding') we need, based on the features in column 9:
@@ -72,7 +92,7 @@ Optional: An optional step to use `cellranger mkgtf` to keep the genes (usually 
 #For example, I have a GTF like this:
 X  FlyBase  mRNA  19961689  19968479  .  +  .  gene_id "FBgn0031081"; gene_symbol "Nep3"; transcript_id "FBtr0070000"; transcript_symbol "Nep3-RA"; group "protein_coding"
 
-#If I would like to keep GTF lines with gene_symbol == "Nep3":
+#For example, if I would like to keep GTF lines with gene_symbol == "Nep3":
 cellranger mkgtf dmel-all-r6.27.filtered.gtf dmel-all-r6.27.filtered.Test.gtf --attribute=gene_symbol:Nep3
 #If I would like to add group feature:
 cellranger mkgtf dmel-all-r6.27.filtered.gtf dmel-all-r6.27.filtered.Test.gtf --attribute=gene_symbol:Nep3 --attribute=group:protein_coding
@@ -218,7 +238,7 @@ GSM4396377/
            ├── features.tsv.gz                                  #Gene list
            └── matrix.mtx.gz                                    #mtx format for gene expression
        ├── filtered_feature_bc_matrix.h5                        #Filtered barcodes in HDF5 format
-       ├── raw_feature_bc_matrix                                #Raw barcode info
+       ├── raw_feature_bc_matrix                                #Raw results, without filtering
        ├── raw_feature_bc_matrix.h5                             #Raw barcode info in HDF5 format
        ├── analysis/                                            #If you choose to run analysis, this path contains results
            ├── clustering
@@ -260,4 +280,24 @@ cellranger aggr --id=FlyBloodAggr --csv=FlyBlood.csv --normalize=mapped --localc
 ```
 Check output files:
 
-
+```
+FlyBloodAggr/
+    └── outs/
+       ├── aggregation.csv
+       ├── analysis/                                            #If you choose to run analysis, this path contains results
+           ├── clustering
+           ├── diffexp
+           ├── pca
+           ├── tsne
+           └── umap
+       ├── cloupe.cloupe                                        #For 10X visualization tool Loupe Cell Browser
+       ├── filtered_feature_bc_matrix/                          #Results for downstream analysis in R (e.g. Seurat、Scater、Monocle)
+           ├── barcodes.tsv.gz                                  #Barcodes detected. `wc -l` will tell you how many cells detected
+           ├── features.tsv.gz                                  #Gene list
+           └── matrix.mtx.gz                                    #mtx format for gene expression
+       ├── filtered_feature_bc_matrix.h5                        #Filtered barcodes in HDF5 format
+       ├── raw_feature_bc_matrix/                               #Raw results, without filtering
+       ├── raw_feature_bc_matrix.h5                             #Raw barcode info in HDF5 format
+       ├── summary.json
+       └── web_summary.html                                     #Summary file
+```
