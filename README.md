@@ -230,24 +230,24 @@ Check output files:
 ```
 GSM4396377/
     └── outs/
-       ├── web_summary.html                                     #Summary file
-       ├── metrics_summary.csv                                  #Data metrics
-       ├── possorted_genome_bam.bam, bai                        #Genome mapping file
-       ├── filtered_gene_bc_matrices/                           #Results for downstream analysis in R (e.g. Seurat、Scater、Monocle)
-           ├── barcodes.tsv.gz                                  #Barcodes detected. `wc -l` will tell you how many cells detected
-           ├── features.tsv.gz                                  #Gene list
-           └── matrix.mtx.gz                                    #mtx format for gene expression
-       ├── filtered_feature_bc_matrix.h5                        #Filtered barcodes in HDF5 format
-       ├── raw_feature_bc_matrix                                #Raw results, without filtering
-       ├── raw_feature_bc_matrix.h5                             #Raw barcode info in HDF5 format
-       ├── analysis/                                            #If you choose to run analysis, this path contains results
+       ├── web_summary.html                   #Summary file
+       ├── metrics_summary.csv                #Data metrics
+       ├── possorted_genome_bam.bam, bai      #Genome mapping file
+       ├── filtered_gene_bc_matrices/         #Results for downstream analysis in R (e.g. Seurat、Scater、Monocle)
+           ├── barcodes.tsv.gz                #Barcodes detected. `wc -l` will tell you how many cells detected
+           ├── features.tsv.gz                #Gene list
+           └── matrix.mtx.gz                  #mtx format for gene expression
+       ├── filtered_feature_bc_matrix.h5      #Filtered barcodes in HDF5 format
+       ├── raw_feature_bc_matrix              #Raw results, without filtering
+       ├── raw_feature_bc_matrix.h5           #Raw barcode info in HDF5 format
+       ├── analysis/                          #If you choose to run analysis, this path contains results
            ├── clustering
            ├── diffexp
            ├── pca
            ├── tsne
            └── umap
-       ├── molecule_info.h5                                     #Input file for cellranger aggr program
-       └── cloupe.cloupe                                        #For 10X visualization tool Loupe Cell Browser
+       ├── molecule_info.h5                   #Input file for cellranger aggr program
+       └── cloupe.cloupe                      #For 10X visualization tool Loupe Cell Browser
 ```
 
 ## 5, Optional: Run Cell Ranger aggr to merge multiple datasets
@@ -284,20 +284,20 @@ Check output files:
 FlyBloodAggr/
     └── outs/
        ├── aggregation.csv
-       ├── analysis/                                            #If you choose to run analysis, this path contains results
+       ├── analysis/                          #If you choose to run analysis, this path contains results
            ├── clustering
            ├── diffexp
            ├── pca
            ├── tsne
            └── umap
-       ├── cloupe.cloupe                                        #For 10X visualization tool Loupe Cell Browser
-       ├── filtered_feature_bc_matrix/                          #Results for downstream analysis in R (e.g. Seurat、Scater、Monocle)
-           ├── barcodes.tsv.gz                                  #Barcodes detected. `wc -l` will tell you how many cells detected
-           ├── features.tsv.gz                                  #Gene list
-           └── matrix.mtx.gz                                    #mtx format for gene expression
-       ├── filtered_feature_bc_matrix.h5                        #Filtered barcodes in HDF5 format
-       ├── raw_feature_bc_matrix/                               #Raw results, without filtering
-       ├── raw_feature_bc_matrix.h5                             #Raw barcode info in HDF5 format
+       ├── cloupe.cloupe                      #For 10X visualization tool Loupe Cell Browser
+       ├── filtered_feature_bc_matrix/        #Results for downstream analysis in R (e.g. Seurat、Scater、Monocle)
+           ├── barcodes.tsv.gz                #Barcodes detected. `wc -l` will tell you how many cells detected
+           ├── features.tsv.gz                #Gene list
+           └── matrix.mtx.gz                  #mtx format for gene expression
+       ├── filtered_feature_bc_matrix.h5      #Filtered barcodes in HDF5 format
+       ├── raw_feature_bc_matrix/             #Raw results, without filtering
+       ├── raw_feature_bc_matrix.h5           #Raw barcode info in HDF5 format
        ├── summary.json
-       └── web_summary.html                                     #Summary file
+       └── web_summary.html                   #Summary file
 ```
