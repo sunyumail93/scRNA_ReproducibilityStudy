@@ -75,11 +75,17 @@ https://www.reddit.com/r/bioinformatics/comments/8ht6kc/converting_dropseq_and_f
 
 ## 2, Prepare Drosophila genome and annotation files for Cell Ranger
 
+### 2.1 Download files
+
 As claimed in the original paper, they used fruit fly genome r6.27:
 
-Download the same genome as the eLife paper used: FlyBase r6.27: [dmel-all-chromosome-r6.27.fasta](ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/dmel_r6.27_FB2019_02/fasta/)
+Download the same genome as the eLife paper used: FlyBase r6.27: dmel-all-chromosome-r6.27.fasta 
+(ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/dmel_r6.27_FB2019_02/fasta/)
 
-Then download GTF annotation file: [dmel-all-r6.27.gtf](ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/dmel_r6.27_FB2019_02/gtf/)
+Then download GTF annotation file: dmel-all-r6.27.gtf
+(ftp://ftp.flybase.net/genomes/Drosophila_melanogaster/dmel_r6.27_FB2019_02/gtf/)
+
+### 2.2 Filter GTF
 
 After comparing the GTF I downloaded with the published single cell counts (gene names), I found they removed mirRNA genes and snoRNA genes in the annotation.
 
@@ -102,10 +108,29 @@ Invalid strand in GTF line 116680: 3R FlyBase mRNA 21360390 21377399...gene_id "
 
 #This was because mod(mdg4) has transcripts from both strands, so column 7 in GTF doesn't have strad information. Remove it:
 awk '$12!="\"mod\(mdg4\)\"\;"'  dmel-all-r6.27.filtered.gtf.t > dmel-all-r6.27.filtered.gtf
+```
+
+### 2.3 Modify GTF gene names
+
+Meaningful gene names will facilate downstream analyses in R.
+
+By default, Cell Ranger use gene_id to build count matrix.
+
+In our current GTF annotation, gene_id uses FlyBase gene name, which is not informative. We need to change it to gene_symbol:
+
+```
+awk '{OFS="\t";print $1,$2,$3,$4,$5,$6,$7,$8}' dmel-all-r6.27.filtered.gtf > dmel-all-r6.27.filtered.gtf.col1-8
+awk '{print $9,$12,$11,$12,$13,$14,$15,$16,$17,$18,$19}' dmel-all-r6.27.filtered.gtf > dmel-all-r6.27.filtered.gtf.col9-19
+paste dmel-all-r6.27.filtered.gtf.col1-8 dmel-all-r6.27.filtered.gtf.col9-19 > dmel-all-r6.27.filtered.modified.gtf
+
+#Also make sure the genes on mitochrondria have a common prefix, since we will use mitochrondria mapping reads to filter out low quality cells
+#Low-quality / dying cells often exhibit extensive mitochondrial contamination
+grep mitochondrion_genome dmel-all-r6.27.filtered.modified.gtf
+#All mitochrondria genes have a prefix: "mt"
 
 #Final files:
--rw-r-----+ 1 ysun43 user 145942246 Nov  7 16:43 dmel-all-chromosome-r6.27.fasta
--rw-rw----+ 1 ysun43 user  77446320 Nov 11 20:45 dmel-all-r6.27.filtered.gtf
+-rw-r-----+ 1 ysun43 root 145942246 Nov  7 16:43 dmel-all-chromosome-r6.27.fasta
+-rw-rw----+ 1 ysun43 root  76090500 Nov 12 21:54 dmel-all-r6.27.filtered.modified.gtf
 ```
 
 ## 3, Build STAR reference (index) for genome mapping:
@@ -141,11 +166,14 @@ dm6/
     ├── reference.json
     ├── genes/
        └── genes.pickle
-    └── star/
+    └── star/                    #STAR index files
        ...
 ```
 
 ## 4, Run Cell Ranger count:
+
+### 4.1 Rename files
+
 Since we downloaded data from NCBI, rather than generating FASTQ files from bcl2fastq (see more details [here](https://support.10xgenomics.com/single-cell-gene-expression/software/pipelines/2.0/using/mkfastq)), all data need to be renamed to meet the software criteria.
 
 ```
@@ -203,6 +231,8 @@ scRNA/
     ├── Counting/
     └── Aggr/
 ```
+
+### 4.2 Generate gene counts
 
 Go to the Counting folder, and submit cellranger count scripts:
 
@@ -301,3 +331,36 @@ FlyBloodAggr/
        ├── summary.json
        └── web_summary.html                   #Summary file
 ```
+
+## 6, Single cell downstream analysis: QC and noramlization using Seurat
+
+So far, we have completed Cell Ranger pipeline and generated gene counts (barcodes.tsv.gz, features.tsv.gz, matrix.mtx.gz).
+
+After installing Seurat in R, we need to import data into R:
+
+Althrough we usuall add a prefix to those output files, such as XXX_barcodes.tsv.gz, XXX_features.tsv.gz, XXX_matrix.mtx.gz, Seurat doesn't allow any prefix.
+
+We have to follow the data hierarchy below, and all files need to keep .gz format.
+
+```
+Reproduced_CellRangerOutput
+    ├── GSM4396377_unwounded1
+        ├── barcodes.tsv.gz
+        ├── features.tsv.gz
+        └── matrix.mtx.gz
+    ├── GSM4396378_wounded1
+        ├── barcodes.tsv.gz
+        ├── features.tsv.gz
+        └── matrix.mtx.gz
+    ├── GSM4396379_unwounded2
+        ├── barcodes.tsv.gz
+        ├── features.tsv.gz
+        └── matrix.mtx.gz
+    └── GSM4396380_wounded2
+        ├── barcodes.tsv.gz
+        ├── features.tsv.gz
+        └── matrix.mtx.gz
+```
+
+
+
