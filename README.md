@@ -116,7 +116,7 @@ Meaningful gene names will facilate downstream analyses in R.
 
 By default, Cell Ranger use gene_id to build count matrix.
 
-In our current GTF annotation, gene_id uses FlyBase gene name, which is not informative. We need to change it to gene_symbol:
+In our current GTF annotation, gene_id uses FlyBase gene name, which is not informative. Here we change it to gene_symbol:
 
 ```
 awk '{OFS="\t";print $1,$2,$3,$4,$5,$6,$7,$8}' dmel-all-r6.27.filtered.gtf > dmel-all-r6.27.filtered.gtf.col1-8
@@ -126,7 +126,7 @@ paste dmel-all-r6.27.filtered.gtf.col1-8 dmel-all-r6.27.filtered.gtf.col9-19 > d
 #Also make sure the genes on mitochrondria have a common prefix, since we will use mitochrondria mapping reads to filter out low quality cells
 #Low-quality / dying cells often exhibit extensive mitochondrial contamination
 grep mitochondrion_genome dmel-all-r6.27.filtered.modified.gtf
-#All mitochrondria genes have a prefix: "mt"
+#All mitochrondria genes share a prefix: "mt:"
 
 #Final files:
 -rw-r-----+ 1 ysun43 root 145942246 Nov  7 16:43 dmel-all-chromosome-r6.27.fasta
