@@ -362,5 +362,105 @@ Reproduced_CellRangerOutput
         └── matrix.mtx.gz
 ```
 
+### 6.1 Read data into R:
 
+Manual for Seurat: https://satijalab.org/seurat/v3.2/pbmc3k_tutorial.html
+
+The following R script can be found in the repository: scRNAseq.ReproducibilityStudy.R
+
+```
+#R codes
+
+# Current path points to the folder name: Reproduced_CellRangerOutput
+CurrPath <- dirname(rstudioapi::getSourceEditorContext()$path)
+setwd(CurrPath)
+library(Seurat)
+
+# Porvide folder names to Read10X function
+GSM4396377_unwounded1 <- Read10X(data.dir = "./GSM4396377_unwounded1")
+GSM4396378_wounded1 <- Read10X(data.dir = "./GSM4396378_wounded1")
+GSM4396379_unwounded2 <- Read10X(data.dir = "./GSM4396379_unwounded2")
+GSM4396380_wounded2 <- Read10X(data.dir = "./GSM4396380_wounded2")
+
+# Crate Seurat Object
+# "project =" spefifies the data name for further analysis
+unwounded1 <- CreateSeuratObject(counts = GSM4396377_unwounded1, project = "unwounded1")
+wounded1 <- CreateSeuratObject(counts = GSM4396378_wounded1, project = "wounded1")
+unwounded2 <- CreateSeuratObject(counts = GSM4396379_unwounded2, project = "unwounded2")
+wounded2 <- CreateSeuratObject(counts = GSM4396380_wounded2, project = "wounded2")
+
+# Merge 4 datasets
+Merged <- merge(unwounded1, y = c(wounded1, unwounded2, wounded2), add.cell.ids = c("unwounded1", "wounded1", "unwounded2", "wounded2"), project = "Merged10X")
+head(colnames(Merged))
+tail(colnames(Merged))
+table(Merged$orig.ident)
+
+```
+
+### 6.2 QC
+
+```
+# Define a pattern for mitochondrial genes. This has been checked in the GTF generation step
+# In our annotation, mitochondrial genes has a prefix: "mt:"
+Merged[["percent.mt"]] <- PercentageFeatureSet(Merged, pattern = "^mt:")
+
+# Visualize QC metrics as a violin plot
+head(Merged@meta.data, 5)
+
+# /images/Plot1.QC1.Violin.BeforeFiltering.png
+VlnPlot(Merged, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3, pt.size = 0.1)
+
+# /images/Plot2.QC2.Correlation.BeforeFiltering.png
+plot1 <- FeatureScatter(Merged, feature1 = "nCount_RNA", feature2 = "percent.mt", pt.size = 0.5)
+plot2 <- FeatureScatter(Merged, feature1 = "nCount_RNA", feature2 = "nFeature_RNA", pt.size = 0.5)
+CombinePlots(plots = list(plot1, plot2))
+```
+
+![image](/images/Plot1.QC1.Violin.BeforeFiltering.png)
+![image](/images/Plot2.QC2.Correlation.BeforeFiltering.png)
+
+```
+# Filtering
+# Using the cutoff in the Seurat workflow will filter out most of the cells. Here we ignore the percent.mt
+Merged_filtered <- subset(Merged, subset = nFeature_RNA > 200 & nFeature_RNA < 3000)
+
+# /images/Plot3.QC3.Violin.AfterFiltering.png
+VlnPlot(Merged_filtered, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), ncol = 3, pt.size = 0.1)
+
+# /images/Plot4.QC4.Correlation.AfterFiltering.png
+plot1 <- FeatureScatter(Merged_filtered, feature1 = "nCount_RNA", feature2 = "percent.mt", pt.size = 0.5)
+# If the correlation is close or above 0.9, we can consider it as a good dataset
+plot2 <- FeatureScatter(Merged_filtered, feature1 = "nCount_RNA", feature2 = "nFeature_RNA", pt.size = 0.5)
+CombinePlots(plots = list(plot1, plot2))
+table(Merged_filtered$orig.ident)
+```
+
+![image](/images/Plot3.QC3.Violin.AfterFiltering.png)
+![image](/images/Plot4.QC4.Correlation.AfterFiltering.png)
+
+### 6.3 Feature selection and data scaling
+
+```
+# Normalize the data using default parameters
+Merged_filtered_norm <- NormalizeData(Merged_filtered)
+
+# Find highly variable features wihtin cell population. Use default: 2000
+Merged_filtered_norm_feature <- FindVariableFeatures(Merged_filtered_norm, selection.method = "vst", nfeatures = 2000)
+
+# Identify the 10 most highly variable genes
+top20 <- head(VariableFeatures(Merged_filtered_norm_feature), 20)
+
+# plot variable features with and without labels
+
+# /images/Plot5.VariableFeatures.png
+plot1 <- VariableFeaturePlot(Merged_filtered_norm_feature)
+plot2 <- LabelPoints(plot = plot1, points = top20, repel = TRUE)
+CombinePlots(plots = list(plot1, plot2))
+
+# Scale the data, so the mean value will be 0 across single cells
+all.genes <- rownames(Merged_filtered_norm_feature)
+Merged_filtered_norm_feature_scale <- ScaleData(Merged_filtered_norm_feature, features = all.genes)
+```
+
+![image](/images/Plot5.VariableFeatures.png)
 
